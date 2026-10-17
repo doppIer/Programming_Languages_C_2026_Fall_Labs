@@ -16,3 +16,10 @@ bin/
 Thumbs.db
 .vscode/settings.json
 Makefile copy
+
+# Week 5 generated files
+data.txt
+notes.txt
+student.txt
+students.txt
+student.bin
