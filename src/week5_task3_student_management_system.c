@@ -15,6 +15,7 @@
 #define LINE_LEN 256
 #define DATA_FILE "students.txt"
 
+// One student record: name, ID and GPA
 typedef struct Student {
     char name[NAME_LEN];
     int id;
@@ -33,6 +34,7 @@ int main(void) {
     char input[LINE_LEN];
     int running = 1;
 
+    // Load saved students from the file (0 on the first run)
     count = load_students(students, MAX_STUDENTS);
     printf("Loaded %d student(s) from %s\n", count, DATA_FILE);
 
@@ -59,6 +61,7 @@ int main(void) {
                 add_student(students, &count);
                 break;
             case 3:
+                // Write everything back to the file before quitting
                 if (save_students(students, count) != 0) {
                     perror(DATA_FILE);
                     fprintf(stderr, "Error: could not save data to %s\n", DATA_FILE);
@@ -93,7 +96,9 @@ int read_line(const char *prompt, char *buf, size_t size) {
     return 0;
 }
 
+// Reads students from DATA_FILE into arr. Returns how many were loaded.
 int load_students(Student arr[], int max) {
+    // A missing file is fine: it just means there is no data yet
     FILE *fp = fopen(DATA_FILE, "r");
     if (fp == NULL) {
         return 0;
@@ -102,8 +107,10 @@ int load_students(Student arr[], int max) {
     char line[LINE_LEN];
     int count = 0;
 
+    // Stop at max so we never write past the end of the array
     while (count < max && fgets(line, sizeof line, fp) != NULL) {
         Student s = {0};
+        // Keep the line only if name, ID and GPA were all read; skip bad lines
         if (sscanf(line, "%49[^,],%d,%f", s.name, &s.id, &s.gpa) == 3) {
             arr[count] = s;
             count++;
@@ -114,12 +121,14 @@ int load_students(Student arr[], int max) {
     return count;
 }
 
+// Overwrites DATA_FILE with all students. Returns 0 on success, -1 on error.
 int save_students(const Student arr[], int count) {
     FILE *fp = fopen(DATA_FILE, "w");
     if (fp == NULL) {
         return -1;
     }
 
+    // One line per student: name,id,gpa
     for (int i = 0; i < count; i++) {
         fprintf(fp, "%s,%d,%.2f\n", arr[i].name, arr[i].id, arr[i].gpa);
     }
@@ -130,6 +139,7 @@ int save_students(const Student arr[], int count) {
     return 0;
 }
 
+// Asks the user for a new student, checks the input and adds it to arr.
 void add_student(Student arr[], int *count) {
     char name[LINE_LEN];
     char id_buf[LINE_LEN];
@@ -141,6 +151,7 @@ void add_student(Student arr[], int *count) {
         return;
     }
 
+    // Read all three fields as text first, then check them
     if (read_line("Enter name: ", name, sizeof name) != 0) {
         return;
     }
@@ -151,23 +162,27 @@ void add_student(Student arr[], int *count) {
         return;
     }
 
+    // Name must not be empty, must not contain a comma (it breaks the file format) and must fit
     if (name[0] == '\0' || strchr(name, ',') != NULL || strlen(name) >= NAME_LEN) {
         printf("Invalid input. Student not added.\n");
         return;
     }
 
+    // ID must be a whole number with nothing extra after it
     long id = strtol(id_buf, &end, 10);
     if (end == id_buf || *end != '\0') {
         printf("Invalid input. Student not added.\n");
         return;
     }
 
+    // GPA must be a number between 0.0 and 4.0
     float gpa = strtof(gpa_buf, &end);
     if (end == gpa_buf || *end != '\0' || gpa < 0.0f || gpa > 4.0f) {
         printf("Invalid input. Student not added.\n");
         return;
     }
 
+    // Everything is valid: store the student at the end of the array
     Student s = {0};
     strcpy(s.name, name);
     s.id = (int)id;
@@ -178,6 +193,7 @@ void add_student(Student arr[], int *count) {
     printf("Student added successfully!\n");
 }
 
+// Prints all students as a table.
 void list_students(const Student arr[], int count) {
     if (count == 0) {
         printf("No students found.\n");

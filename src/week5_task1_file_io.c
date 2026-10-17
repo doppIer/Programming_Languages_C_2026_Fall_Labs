@@ -18,10 +18,12 @@ int main(int argc, char *argv[]) {
     char line[LINE_LEN];
     int line_count = 0;
 
+    // Use the file name from the command line if one is given
     if (argc > 1) {
         filename = argv[1];
     }
 
+    // Open the file for writing ("w" creates it or clears it)
     printf("Writing lines to %s...\n", filename);
     fp = fopen(filename, "w");
     if (fp == NULL) {
@@ -29,16 +31,19 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Write two lines and close the file so the data is saved
     fprintf(fp, "Hello, file I/O in C!\n");
     fprintf(fp, "This is another line.\n");
     fclose(fp);
 
+    // Open the same file again, this time for reading
     fp = fopen(filename, "r");
     if (fp == NULL) {
         perror(filename);
         return EXIT_FAILURE;
     }
 
+    // Read one line at a time until the end of the file
     printf("Reading contents:\n");
     while (fgets(line, sizeof line, fp) != NULL) {
         printf("%s", line);

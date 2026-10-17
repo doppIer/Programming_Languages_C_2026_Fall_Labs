@@ -12,6 +12,7 @@
 
 #define MAX_NAME_LEN 50
 
+// One student record: name, age and GPA
 typedef struct Student {
     char name[MAX_NAME_LEN];
     int age;
@@ -22,6 +23,7 @@ int save_student(const Student *s, const char *filename);
 int load_student(const char *filename, Student *out);
 
 int main(void) {
+    // Create the student we want to save
     Student s1 = {0};
     strcpy(s1.name, "Alice");
     s1.age = 21;
@@ -30,23 +32,27 @@ int main(void) {
     Student loaded = {0};
     const char *filename = "student.txt";
 
+    // Save the record; stop if the file cannot be written
     printf("Saving student to file...\n");
     if (save_student(&s1, filename) != 0) {
         perror(filename);
         return EXIT_FAILURE;
     }
 
+    // Read the record back into a new variable
     printf("Loading student from file...\n");
     if (load_student(filename, &loaded) != 0) {
         fprintf(stderr, "Error: could not load student from %s\n", filename);
         return EXIT_FAILURE;
     }
 
+    // Print it to check that it matches the original
     printf("Loaded student: %s, %d, GPA %.2f\n", loaded.name, loaded.age, loaded.gpa);
 
     return EXIT_SUCCESS;
 }
 
+// Writes the student as one line "name age gpa". Returns 0 on success, -1 on error.
 int save_student(const Student *s, const char *filename) {
     FILE *fp = fopen(filename, "w");
     if (fp == NULL) {
@@ -61,15 +67,18 @@ int save_student(const Student *s, const char *filename) {
     return 0;
 }
 
+// Reads "name age gpa" from the file into out. Returns 0 on success, -1 on error.
 int load_student(const char *filename, Student *out) {
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         return -1;
     }
 
+    // %49s stops the name from overflowing the 50-char array
     int result = fscanf(fp, "%49s %d %f", out->name, &out->age, &out->gpa);
     fclose(fp);
 
+    // All three fields must be read, otherwise the data is bad
     if (result != 3) {
         return -1;
     }
