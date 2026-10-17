@@ -12,7 +12,7 @@
 
 #define MAX_NAME_LEN 50
 
-// One student record: name, age and GPA
+// my student record has a name, an age and a GPA
 typedef struct Student {
     char name[MAX_NAME_LEN];
     int age;
@@ -23,7 +23,7 @@ int save_student(const Student *s, const char *filename);
 int load_student(const char *filename, Student *out);
 
 int main(void) {
-    // Create the student we want to save
+    // I make the student that I want to save
     Student s1 = {0};
     strcpy(s1.name, "Alice");
     s1.age = 21;
@@ -32,27 +32,27 @@ int main(void) {
     Student loaded = {0};
     const char *filename = "student.txt";
 
-    // Save the record; stop if the file cannot be written
+    // I save the student, if it fails I stop the program
     printf("Saving student to file...\n");
     if (save_student(&s1, filename) != 0) {
         perror(filename);
         return EXIT_FAILURE;
     }
 
-    // Read the record back into a new variable
+    // I load it back into a different variable to see if saving worked
     printf("Loading student from file...\n");
     if (load_student(filename, &loaded) != 0) {
         fprintf(stderr, "Error: could not load student from %s\n", filename);
         return EXIT_FAILURE;
     }
 
-    // Print it to check that it matches the original
+    // I print it so I can compare it with the original
     printf("Loaded student: %s, %d, GPA %.2f\n", loaded.name, loaded.age, loaded.gpa);
 
     return EXIT_SUCCESS;
 }
 
-// Writes the student as one line "name age gpa". Returns 0 on success, -1 on error.
+// I write the student as one line like "Alice 21 3.75", I return 0 if it worked and -1 if not
 int save_student(const Student *s, const char *filename) {
     FILE *fp = fopen(filename, "w");
     if (fp == NULL) {
@@ -67,18 +67,18 @@ int save_student(const Student *s, const char *filename) {
     return 0;
 }
 
-// Reads "name age gpa" from the file into out. Returns 0 on success, -1 on error.
+// I read the line back into out, I return 0 if it worked and -1 if not
 int load_student(const char *filename, Student *out) {
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         return -1;
     }
 
-    // %49s stops the name from overflowing the 50-char array
+    // I use %49s so a long name can not go past the 50 chars of the array
     int result = fscanf(fp, "%49s %d %f", out->name, &out->age, &out->gpa);
     fclose(fp);
 
-    // All three fields must be read, otherwise the data is bad
+    // I need all 3 values, if I got less the file is broken
     if (result != 3) {
         return -1;
     }
